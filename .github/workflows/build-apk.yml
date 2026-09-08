@@ -3,6 +3,7 @@ name: Build Android APK
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -13,8 +14,8 @@ jobs:
 
       - name: Extract Archive
         run: |
-          tar -xvf TokoAisyah_progress.tar.gz.tar
-          cp -r TokoAisyah_progress/* . || true
+          tar -xvf TokoAisyah_progress.tar.gz.tar || tar -xvf *.tar*
+          ls -la
 
       - name: Set up Java
         uses: actions/setup-java@v3
@@ -28,13 +29,17 @@ jobs:
           channel: 'stable'
 
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          if [ -d "TokoAisyah_progress" ]; then cd TokoAisyah_progress; fi
+          flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release
+        run: |
+          if [ -d "TokoAisyah_progress" ]; then cd TokoAisyah_progress; fi
+          flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v3
         with:
           name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: "**/build/app/outputs/flutter-apk/app-release.apk"
