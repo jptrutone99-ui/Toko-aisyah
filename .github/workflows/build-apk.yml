@@ -12,9 +12,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Extract Zip
+      - name: Extract Any Archive
         run: |
-          unzip -o project.zip -d .
+          if [ -f *.zip ]; then
+            unzip -o *.zip -d .
+          elif [ -f *.tar* ]; then
+            tar -xvf *.tar*
+          fi
+          if [ -d TokoAisyah_progress ]; then
+            cp -r TokoAisyah_progress/* . || true
+          fi
           ls -la
 
       - name: Set up Java
