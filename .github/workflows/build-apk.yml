@@ -20,13 +20,12 @@ jobs:
             tar -xvf *.tar*
           fi
           
-          # Cari lokasi pubspec.yaml dan pindahkan semua isinya ke root
-          PROJECT_DIR=$(find . -name "pubspec.yaml" -exec dirname {} \;)
-          if [ -n "$PROJECT_DIR" ] && [ "$PROJECT_DIR" != "." ]; then
-            echo "Memindahkan file dari $PROJECT_DIR ke root..."
-            cp -rn $PROJECT_DIR/* . || true
-          fi
-          ls -la
+          # Cari folder yang berisi pubspec.yaml
+          PUB_PATH=$(find . -name "pubspec.yaml" | head -n 1)
+          PROJECT_DIR=$(dirname "$PUB_PATH")
+          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+          echo "Proyek ditemukan di direktori: $PROJECT_DIR"
+          ls -la "$PROJECT_DIR"
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -40,13 +39,15 @@ jobs:
           channel: 'stable'
 
       - name: Install dependencies
+        working-directory: ${{ env.PROJECT_DIR }}
         run: flutter pub get
 
       - name: Build APK
+        working-directory: ${{ env.PROJECT_DIR }}
         run: flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: "**/build/app/outputs/flutter-apk/app-release.apk"
