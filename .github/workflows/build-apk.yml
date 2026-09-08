@@ -12,10 +12,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extract Zip
+      - name: Extract and Move Everything
         run: |
-          unzip -o TokoAisyah.zip -d .
-          ls -la TokoAisyah
+          # Ekstrak semua zip/tar yang ada
+          unzip -o TokoAisyah.zip -d . || true
+          tar -xvf TokoAisyah_progress.tar.gz.tar || true
+
+          # Pindahkan semua file dari folder TokoAisyah atau TokoAisyah_progress ke root
+          if [ -d TokoAisyah ]; then
+            cp -r TokoAisyah/* . || true
+          fi
+          if [ -d TokoAisyah_progress ]; then
+            cp -r TokoAisyah_progress/* . || true
+          fi
+
+          echo "=== ISI FOLDER UTAMA ==="
+          ls -la
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -29,15 +41,13 @@ jobs:
           channel: 'stable'
 
       - name: Install dependencies
-        working-directory: TokoAisyah
         run: flutter pub get
 
       - name: Build APK
-        working-directory: TokoAisyah
         run: flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: TokoAisyah/build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
