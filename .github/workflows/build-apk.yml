@@ -12,37 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Debug and Extract Everything
+      - name: Extract Zip
         run: |
-          echo "=== CEK FILE AVAL ==="
-          ls -la
-          
-          # Ekstrak semua file arsip yang ada
-          for f in *; do
-            if [[ "$f" == *.zip ]]; then
-              unzip -o "$f" -d .
-            elif [[ "$f" == *.tar* ]]; then
-              tar -xvf "$f"
-            fi
-          done
-
-          echo "=== CEK SETELAH EKSTRAK ==="
-          ls -la
-
-          # Cari file pubspec.yaml di folder mana pun
-          PUB_FILE=$(find . -name "pubspec.yaml" | head -n 1)
-          echo "Lokasi pubspec.yaml: $PUB_FILE"
-
-          if [ -n "$PUB_FILE" ]; then
-            DIR=$(dirname "$PUB_FILE")
-            if [ "$DIR" != "." ]; then
-              echo "Memindahkan isi $DIR ke root..."
-              cp -r $DIR/* .
-            fi
-          fi
-
-          echo "=== CEK HASIL AKHIR ROOT ==="
-          ls -la
+          unzip -o TokoAisyah.zip -d .
+          ls -la TokoAisyah
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -56,13 +29,15 @@ jobs:
           channel: 'stable'
 
       - name: Install dependencies
+        working-directory: TokoAisyah
         run: flutter pub get
 
       - name: Build APK
+        working-directory: TokoAisyah
         run: flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: "**/build/app/outputs/flutter-apk/app-release.apk"
+          path: TokoAisyah/build/app/outputs/flutter-apk/app-release.apk
