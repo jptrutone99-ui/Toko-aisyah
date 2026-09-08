@@ -12,20 +12,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extract Any Archive
+      - name: Extract and Move Project Files
         run: |
+          # Ekstrak arsip zip atau tar
           if [ -f *.zip ]; then
             unzip -o *.zip -d .
           elif [ -f *.tar* ]; then
             tar -xvf *.tar*
           fi
+
+          # Temukan lokasi pubspec.yaml dan pindahkan isinya ke root
+          PUB_FILE=$(find . -mindepth 2 -name "pubspec.yaml" | head -n 1)
+          if [ -n "$PUB_FILE" ]; then
+            DIR=$(dirname "$PUB_FILE")
+            echo "Memindahkan file dari $DIR ke folder utama..."
+            cp -r $DIR/* .
+          fi
           
-          # Cari folder yang berisi pubspec.yaml
-          PUB_PATH=$(find . -name "pubspec.yaml" | head -n 1)
-          PROJECT_DIR=$(dirname "$PUB_PATH")
-          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
-          echo "Proyek ditemukan di direktori: $PROJECT_DIR"
-          ls -la "$PROJECT_DIR"
+          ls -la
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -39,15 +43,13 @@ jobs:
           channel: 'stable'
 
       - name: Install dependencies
-        working-directory: ${{ env.PROJECT_DIR }}
         run: flutter pub get
 
       - name: Build APK
-        working-directory: ${{ env.PROJECT_DIR }}
         run: flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: "**/build/app/outputs/flutter-apk/app-release.apk"
+          path: build/app/outputs/flutter-apk/app-release.apk
