@@ -12,32 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extract and Force Move Files
-        run: |
-          # Cari dan ekstrak semua file zip/tar secara otomatis
-          find . -maxdepth 1 -name "*.zip" -exec unzip -o {} -d . \;
-          find . -maxdepth 1 -name "*.tar*" -exec tar -xvf {} \;
-
-          # Cari lokasi pubspec.yaml
-          PUB_PATH=$(find . -name "pubspec.yaml" -not -path "*/.*" | head -n 1)
-          
-          if [ -n "$PUB_PATH" ]; then
-            SRC_DIR=$(dirname "$PUB_PATH")
-            echo "File pubspec.yaml ditemukan di: $SRC_DIR"
-            
-            if [ "$SRC_DIR" != "." ]; then
-              echo "Memindahkan file dari $SRC_DIR ke root..."
-              cp -rn "$SRC_DIR"/* . || true
-              cp -rn "$SRC_DIR"/.* . 2>/dev/null || true
-            fi
-          else
-            echo "Error: pubspec.yaml tidak ditemukan sama sekali!"
-            exit 1
-          fi
-
-          echo "=== DOKUMEN DI ROOT SEKARANG ==="
-          ls -la
-
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
