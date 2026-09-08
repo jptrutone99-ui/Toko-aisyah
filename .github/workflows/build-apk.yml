@@ -19,8 +19,12 @@ jobs:
           elif [ -f *.tar* ]; then
             tar -xvf *.tar*
           fi
-          if [ -d TokoAisyah_progress ]; then
-            cp -r TokoAisyah_progress/* . || true
+          
+          # Cari lokasi pubspec.yaml dan pindahkan semua isinya ke root
+          PROJECT_DIR=$(find . -name "pubspec.yaml" -exec dirname {} \;)
+          if [ -n "$PROJECT_DIR" ] && [ "$PROJECT_DIR" != "." ]; then
+            echo "Memindahkan file dari $PROJECT_DIR ke root..."
+            cp -rn $PROJECT_DIR/* . || true
           fi
           ls -la
 
