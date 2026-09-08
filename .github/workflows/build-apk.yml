@@ -12,23 +12,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extract and Move Project Files
+      - name: Debug and Extract Everything
         run: |
-          # Ekstrak arsip zip atau tar
-          if [ -f *.zip ]; then
-            unzip -o *.zip -d .
-          elif [ -f *.tar* ]; then
-            tar -xvf *.tar*
-          fi
+          echo "=== CEK FILE AVAL ==="
+          ls -la
+          
+          # Ekstrak semua file arsip yang ada
+          for f in *; do
+            if [[ "$f" == *.zip ]]; then
+              unzip -o "$f" -d .
+            elif [[ "$f" == *.tar* ]]; then
+              tar -xvf "$f"
+            fi
+          done
 
-          # Temukan lokasi pubspec.yaml dan pindahkan isinya ke root
-          PUB_FILE=$(find . -mindepth 2 -name "pubspec.yaml" | head -n 1)
+          echo "=== CEK SETELAH EKSTRAK ==="
+          ls -la
+
+          # Cari file pubspec.yaml di folder mana pun
+          PUB_FILE=$(find . -name "pubspec.yaml" | head -n 1)
+          echo "Lokasi pubspec.yaml: $PUB_FILE"
+
           if [ -n "$PUB_FILE" ]; then
             DIR=$(dirname "$PUB_FILE")
-            echo "Memindahkan file dari $DIR ke folder utama..."
-            cp -r $DIR/* .
+            if [ "$DIR" != "." ]; then
+              echo "Memindahkan isi $DIR ke root..."
+              cp -r $DIR/* .
+            fi
           fi
-          
+
+          echo "=== CEK HASIL AKHIR ROOT ==="
           ls -la
 
       - name: Set up Java
@@ -52,4 +65,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: "**/build/app/outputs/flutter-apk/app-release.apk"
