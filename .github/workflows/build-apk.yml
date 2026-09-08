@@ -12,9 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Extract Archive
+      - name: Extract Zip
         run: |
-          tar -xvf TokoAisyah_progress.tar.gz.tar || tar -xvf *.tar*
+          unzip -o project.zip -d .
           ls -la
 
       - name: Set up Java
@@ -29,17 +29,13 @@ jobs:
           channel: 'stable'
 
       - name: Install dependencies
-        run: |
-          if [ -d "TokoAisyah_progress" ]; then cd TokoAisyah_progress; fi
-          flutter pub get
+        run: flutter pub get
 
       - name: Build APK
-        run: |
-          if [ -d "TokoAisyah_progress" ]; then cd TokoAisyah_progress; fi
-          flutter build apk --release
+        run: flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v3
         with:
           name: release-apk
-          path: "**/build/app/outputs/flutter-apk/app-release.apk"
+          path: build/app/outputs/flutter-apk/app-release.apk
